@@ -1,0 +1,1 @@
+# Settings, Ollama, paths, etc.
