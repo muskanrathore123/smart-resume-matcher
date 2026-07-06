@@ -13,3 +13,6 @@ when system server start our system first try to connect with db. All tables tha
 In user.py file i have created the User model and  added it into main.py
 
 # Note: everything that we create inside the application we need to define inside the main.py because python run the whole application by using main.py
+
+<!--  "email": "muskan123@gmail.com",
+    "password": "sdfghjkl@123", -->
