@@ -8,3 +8,5 @@ __pycache__/
 .env.*
 .vscode/
 .idea/
+
+backend/data/app.db
