@@ -16,3 +16,16 @@ In user.py file i have created the User model and  added it into main.py
 
 <!--  "email": "muskan123@gmail.com",
     "password": "sdfghjkl@123", -->
+
+ 
+# If you want to use Llama 3 locally, install Ollama.
+- install: sudo snap install ollama
+- version: ollama --version
+- start ollama server : ollama serve
+
+# Download llama 3 model
+- ollama pull llama3
+- ollama list
+
+# Test the model
+ollama run llama3
