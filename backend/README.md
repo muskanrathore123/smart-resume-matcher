@@ -29,3 +29,11 @@ In user.py file i have created the User model and  added it into main.py
 
 # Test the model
 ollama run llama3
+
+# pdf_extractor.py
+This code is part of the document ingestion stage of a RAG (Retrieval-Augmented Generation) pipeline. Its job is to:
+
+- Read PDF files.
+- Extract their text.
+- Split the text into smaller chunks.
+- Return those chunks so they can later be converted into embeddings and stored in a vector database
