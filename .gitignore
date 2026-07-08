@@ -10,3 +10,16 @@ __pycache__/
 .idea/
 
 backend/data/app.db
+
+# ChromaDB
+backend/chroma_db/
+
+# Uploaded files
+backend/data/uploads/
+
+# SQLite databases
+*.sqlite3
+*.db
+
+# VS Code
+.vscode/

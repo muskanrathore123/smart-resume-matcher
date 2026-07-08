@@ -1,5 +1,5 @@
 # ChromaDB setup
-from langchain_community.vectorstores import Chroma
+from langchain_chroma import Chroma
 from langchain_ollama import OllamaEmbeddings
 import os
 
@@ -16,13 +16,14 @@ def get_vectorstore(collection_name: str = "resume_matcher", persist_dir="./chro
 
 def add_documents_to_store(docs, collection_name: str = "resume_matcher"):
     vectorstore = get_vectorstore(collection_name)
-    vectorstore.add_documents(docs)
-    return vectorstore
     '''
-   collection = vectorstore._collection
-   print(collection.count())
-    data = collection.get()
+    collection = vectorstore._collection
+    print(collection.count())
+    data = collection.get(include=["documents", "metadatas", "embeddings"])
     print(data.keys())
-    print(data["documents"])
+    print(data["embeddings"])
     '''
+    vectorstore.add_documents(docs)
+    return vectorstore 
+  
    
