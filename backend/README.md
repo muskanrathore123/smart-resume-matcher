@@ -37,3 +37,6 @@ This code is part of the document ingestion stage of a RAG (Retrieval-Augmented 
 - Extract their text.
 - Split the text into smaller chunks.
 - Return those chunks so they can later be converted into embeddings and stored in a vector database
+
+# vector_store.py
+This code creates and manages a Chroma vector database for a RAG (Retrieval-Augmented Generation) application. Its purpose is to convert documents into embeddings, store them in a vector database, and later retrieve similar documents based on user queries.

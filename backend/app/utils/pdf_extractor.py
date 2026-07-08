@@ -9,7 +9,7 @@ def extract_text_from_pdf(file_path: str) -> str:
         text += page.get_text()
     return text
 
-def load_and_split_documents(file_paths: list[str], chunk_size=800, chunk_overlap=100):
+def load_and_split_documents(file_paths: list[str], chunk_size=1200, chunk_overlap=180):
     splitter = RecursiveCharacterTextSplitter(
         chunk_size=chunk_size,
         chunk_overlap=chunk_overlap,
