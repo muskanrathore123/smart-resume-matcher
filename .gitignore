@@ -20,6 +20,7 @@ backend/data/uploads/
 # SQLite databases
 *.sqlite3
 *.db
-
-# VS Code
+backend/data/app.db-journal
+backend/data/app.sqbpro
+# VS Codebackend/data/app.sqbpro
 .vscode/
