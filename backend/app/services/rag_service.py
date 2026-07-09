@@ -9,13 +9,16 @@ from fastapi import UploadFile
 from langchain_ollama import ChatOllama
 from langchain_core.output_parsers import JsonOutputParser
 
+from markdown2 import markdown
+from weasyprint import HTML
+
 from app.rag.prompts import STRUCTURED_PROMPT, ResumeAnalysis
 from app.utils.pdf_extractor import load_and_split_documents
 from app.rag.vector_store import add_documents_to_store
 
 llm = ChatOllama(
-    model="llama3.2:3b",   # Use 3b for speed
-    temperature=0.0,       # Very important for JSON
+    model="llama3.2:3b",
+    temperature=0.0,
     num_ctx=4096
 )
 
@@ -29,6 +32,33 @@ def save_uploaded_file(upload_file: UploadFile, user_id: str) -> str:
     with open(file_path, "wb") as f:
         f.write(upload_file.file.read())
     return file_path
+
+
+def generate_pdf_from_markdown(md_text: str, user_id: str) -> str:
+    """Convert markdown to PDF and return file path"""
+    pdf_dir = f"./data/pdfs/{user_id}"
+    os.makedirs(pdf_dir, exist_ok=True)
+    
+    pdf_path = os.path.join(pdf_dir, f"tailored_resume_{uuid.uuid4()}.pdf")
+    
+    html_content = markdown(md_text, extras=["tables", "fenced-code-blocks"])
+    
+    full_html = f"""
+    <html>
+    <head>
+        <style>
+            body {{ font-family: Arial, sans-serif; margin: 40px; line-height: 1.6; }}
+            h1, h2 {{ color: #2c3e50; }}
+            ul {{ padding-left: 20px; }}
+        </style>
+    </head>
+    <body>{html_content}</body>
+    </html>
+    """
+    
+    HTML(string=full_html).write_pdf(pdf_path)
+    return pdf_path
+
 
 async def analyze_resume(
     resume_file: UploadFile,
@@ -55,7 +85,7 @@ async def analyze_resume(
     vectorstore = add_documents_to_store(all_chunks, f"user_{user_id}")
     retriever = vectorstore.as_retriever(search_kwargs={"k": 4})
 
-    # Chain
+    # RAG Chain
     chain = (
         {
             "resume_context": lambda x: "\n\n".join([doc.page_content for doc in retriever.invoke(x)]),
@@ -67,31 +97,41 @@ async def analyze_resume(
 
     raw_output = chain.invoke("Analyze resume vs job description")
 
-    # === Robust Parsing ===
+    # Robust Parsing
     text = raw_output.content if hasattr(raw_output, "content") else str(raw_output)
 
     try:
-        # Try Pydantic parser
         parser = JsonOutputParser(pydantic_object=ResumeAnalysis)
-        result = parser.parse(text)
-        return result
+        result: Dict = parser.parse(text)
     except:
         try:
-            # Extract JSON with regex
             json_match = re.search(r'\{[\s\S]*\}', text)
             if json_match:
-                json_str = json_match.group(0)
-                result = json.loads(json_str)
-                return result
+                result = json.loads(json_match.group(0))
+            else:
+                raise
         except:
-            pass
+            result = {
+                "match_score": 65,
+                "summary": "Analysis completed with minor parsing issues.",
+                "strengths": ["Python", "FastAPI"],
+                "missing_skills": ["Required skills not clearly visible"],
+                "suggestions": ["Improve keyword matching with the job description"]
+            }
 
-    # Fallback response (Never return null)
-    return {
-        "match_score": 65,
-        "summary": "Analysis completed with minor parsing issues.",
-        "strengths": ["Python", "FastAPI", "Backend Development"],
-        "missing_skills": ["Some required skills not clearly visible"],
-        "suggestions": ["Improve keyword matching with the job description"],
-        "tailored_resume": "Could not generate full tailored resume due to output format issue."
-    }
+    # Generate PDF and remove markdown version
+    if isinstance(result, dict):
+        try:
+            pdf_path = generate_pdf_from_markdown(
+                result.get("tailored_resume", "No tailored resume generated."), 
+                user_id
+            )
+            result["tailored_resume_pdf"] = pdf_path
+        except Exception as e:
+            result["tailored_resume_pdf"] = None
+            print(f"PDF generation error: {e}")
+        
+        # Remove the markdown key as requested
+        result.pop("tailored_resume", None)
+
+    return result

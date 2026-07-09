@@ -11,17 +11,29 @@ class ResumeAnalysis(BaseModel):
     suggestions: List[str]
     tailored_resume: str
 
-# Much stronger prompt
+# Stronger prompt with strict context-only rule
 STRUCTURED_PROMPT = ChatPromptTemplate.from_template("""
-You are an expert recruiter. Analyze the resume vs job description and **return ONLY valid JSON**, nothing else.
+You are an expert recruiter. Analyze the resume **strictly based on the provided context only**.
 
-**Resume:**
+**Rules:**
+- Use ONLY information present in the Resume and Job Description below.
+- Always generate a **full tailored resume** in clean Markdown format.
+- Improve the original resume by highlighting transferable skills and adding keywords from the JD.
+- Even if the match is low, create an improved version of the resume.
+- Do NOT use your own knowledge or make assumptions.
+- Return ONLY valid JSON. No explanations, no markdown, no extra text.
+
+**Resume Context:**
+<resume_context>
 {resume_context}
+</resume_context>
 
-**Job Description:**
+**Job Description Context:**
+<jd_context>
 {jd_context}
+</jd_context>
 
-Respond with this exact JSON format (no explanation, no markdown, no extra text):
+Respond with this exact JSON format:
 
 {{
   "match_score": 82,
@@ -32,5 +44,5 @@ Respond with this exact JSON format (no explanation, no markdown, no extra text)
   "tailored_resume": "Full markdown resume here..."
 }}
 
-Be concise and accurate.
+Be concise, factual, and strictly follow the context.
 """)
