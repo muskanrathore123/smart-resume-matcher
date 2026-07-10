@@ -5,6 +5,7 @@ from app.core.config import settings
 
 # we need to connect base with main.py
 Base = declarative_base()
+#Using check_same_thread=False allows FastAPI to use the same SQLite database in different threads.
 engine = create_engine(settings.DATABASE_URL, connect_args={"check_same_thread": False})
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 

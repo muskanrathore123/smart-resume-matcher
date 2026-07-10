@@ -9,7 +9,7 @@ async def analyze(
     resume: UploadFile = File(...),
     job_description: UploadFile = File(None),
     jd_text: str = Form(None),
-    # current_user = Depends(get_current_user)
+    current_user = Depends(get_current_user)
 ):
     if not resume.filename.lower().endswith('.pdf'):
         raise HTTPException(status_code=400, detail="Resume must be a PDF")
@@ -17,9 +17,8 @@ async def analyze(
     result = await analyze_resume(
         resume_file=resume,
         jd_file_or_text=jd_text or job_description,
-        user_id="test_user"
-
-        # user_id=str(current_user.id)
+        # user_id="test_user"
+        user_id=str(current_user.id)
 
     )
     
